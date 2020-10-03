@@ -71,10 +71,17 @@ class camera_control:
             self.output_val = "SE"
         else:
             self.output_val = "Error"
-        print(self.output_val)
 
+#Actual code that runs on project back-end
 x = camera_control()
-x.run_loop()
-               
-               
+i = 0
+while True:
+    x.run_loop()
+    if(i % 4 == 0):
+        print(x.output_val)
+    i += 1
+    
+    
+    
+            
                 
