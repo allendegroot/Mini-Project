@@ -8,6 +8,19 @@ import cv2
 from cv2 import aruco
 import numpy
 import math
+import board
+import busio
+import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd
+import smbus2
+lcd_columns = 16
+lcd_rows = 2
+# Initialise I2C bus.
+i2c = busio.I2C(board.SCL, board.SDA)
+
+# Initialise the LCD class
+lcd = character_lcd.Character_LCD_RGB_I2C(i2c, lcd_columns, lcd_rows)
+lcd.clear()
+bus = smbus2.SMBus(1)
 
 #This is the class in which the loop that controls the camera is defined
 class camera_control:
@@ -75,11 +88,32 @@ class camera_control:
 #Actual code that runs on project back-end
 x = camera_control()
 i = 0
+data = 0
 while True:
     x.run_loop()
     if(i % 4 == 0):
         print(x.output_val)
     i += 1
+    data = self.output_num
+    if(data == 1):
+        lcd.clear()
+        lcd.text_direction = lcd.LEFT_TO_RIGHT;
+        lcd.message = "Set Point: 0"
+    elif(data == 2):
+        lcd.clear()
+        lcd.text_direction = lcd.LEFT_TO_RIGHT;
+        lcd.message = "Set Point: 1.5707"
+    elif(data == 3):
+        lcd.clear()
+        lcd.text_direction = lcd.LEFT_TO_RIGHT;
+        lcd.message = "Set Point: 3.14159"
+    elif(data == 4):
+        lcd.clear()
+        lcd.text_direction = lcd.LEFT_TO_RIGHT;
+        lcd.message = "Set Point: 4.7123"
+    
+        
+        
     
     
     
