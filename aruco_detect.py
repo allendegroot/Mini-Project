@@ -12,6 +12,8 @@ import board
 import busio
 import adafruit_character_lcd.character_lcd_rgb_i2c as character_lcd
 import smbus2
+constPi = 3.14159
+constVal = 6
 lcd_columns = 16
 lcd_rows = 2
 # Initialise I2C bus.
@@ -89,32 +91,48 @@ class camera_control:
 x = camera_control()
 i = 0
 data = 0
+reset = 5
 while True:
+    userVar = input("Enter 0 to return wheel to 0: ")
+
     x.run_loop()
     if(i % 4 == 0):
         print(x.output_val)
     i += 1
-    data = self.output_num
-    if(data == 1):
+    data = x.output_num
+    if (userVar == "r"):
+        bus.write_byte(0x08, reset)
         lcd.clear()
         lcd.text_direction = lcd.LEFT_TO_RIGHT;
-        lcd.message = "Set Point: 0"
-    elif(data == 2):
-        lcd.clear()
-        lcd.text_direction = lcd.LEFT_TO_RIGHT;
-        lcd.message = "Set Point: 1.5707"
-    elif(data == 3):
-        lcd.clear()
-        lcd.text_direction = lcd.LEFT_TO_RIGHT;
-        lcd.message = "Set Point: 3.14159"
-    elif(data == 4):
-        lcd.clear()
-        lcd.text_direction = lcd.LEFT_TO_RIGHT;
-        lcd.message = "Set Point: 4.7123"
+        lcd.message = "Set Point: Reset"
+    else: 
+        if(data == 0):
+            continue
+        bus.write_byte(0x08,data)
+        if(data == 1):
+            lcd.clear()
+            lcd.text_direction = lcd.LEFT_TO_RIGHT;
+            lcd.message = "Set Point: 0"
+        elif(data == 2):
+            lcd.clear()
+            lcd.text_direction = lcd.LEFT_TO_RIGHT;
+            lcd.message = "Set Point: 1.5707"
+        elif(data == 3):
+            lcd.clear()
+            lcd.text_direction = lcd.LEFT_TO_RIGHT;
+            lcd.message = "Set Point: 3.1415"
+        elif(data == 4):
+            lcd.clear()
+            lcd.text_direction = lcd.LEFT_TO_RIGHT;
+            lcd.message = "Set Point: 4.7123"
     
         
+    position = bus.read_byte(0x08)
+    print(position)
+    newPosition = ((position * 2 * constPi)/constVal) % (2*constPi)
+    lcd.text_direction = lcd.LEFT_TO_RIGHT;
+    lcd.message =  "\nPos:" + str(newPosition)
         
-    
     
     
             
