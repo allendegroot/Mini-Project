@@ -16,9 +16,18 @@ double angularPositionNew;
 double angularPositionOld;
 double angularVelocity;
 int data = 0;
-int toSend = 0;
+int toSend;
+
+long newPosition;
 
 
+int controlResult = 0;
+const float Kp = 0.430620391450113;
+const float Ki = 0.032853330385174;
+float thetaDesired = 0;
+float totalError = 0;
+float controlSignal;
+int finalControlSignal;
 
 
 //void sendData(){
@@ -30,7 +39,6 @@ Encoder myEnc(2, 3);
 
 unsigned long currentTime = 0;
 int samplePeriod = 10;
-double deltaT;
 unsigned long oldTime;
 void setup() {  
 
@@ -65,56 +73,82 @@ void setup() {
 }
 
 void loop() {
-
   currentTime = millis();
-
-  
-  
   //Anolog write for pin 9
-  if (currentTime <= 3000){
-    analogWrite(motor2Speed, 0);
-  }
-  else if(currentTime >= 3000) {
-    analogWrite(motor2Speed, 128);
-  }
-
-  else{
-    analogWrite(motor2Speed, 0);
-  }
-
-  
+  analogWrite(motor2Speed, controlResult);
   
   //4.4
-  long newPosition = myEnc.read();
+  newPosition = myEnc.read();
   if (newPosition != oldPosition) {
     
     oldPosition = newPosition;
     angularPositionNew = (newPosition * 2 * pi) / 3200;
+    //Serial.println(angularPositionNew);
     
     //Serial.println(angularPositionNew - angularPositionOld);
     angularVelocity = ((angularPositionNew - angularPositionOld) / (samplePeriod)) * pow(10,3);
     angularPositionOld = angularPositionNew;
 
-  //  Serial.print((currentTime-2000));
-    //Serial.print("\t");
-    //Serial.print(angularVelocity);
-    //Serial.println();
-    
-    
+      
   }
+
+  controlResult = controller(angularPositionNew);
+  
   
   while(millis() < currentTime + samplePeriod){
     
   }
   
 }
-  void receiveData(int byteCount){
+void receiveData(int byteCount){
   while(Wire.available()){
     data = Wire.read();
-    Serial.println(data);
+    //Serial.println(data);
+  }
+  totalError = 0;
+  
+  if(data == 1){
+    thetaDesired = (2*pi)+angularPositionNew;
+  }else if(data == 2){
+    thetaDesired = (pi/2)+angularPositionNew;
+  }else if(data == 3){
+    thetaDesired = (pi)+angularPositionNew;
+  }else if(data == 4){
+    thetaDesired = (3*pi/2)+angularPositionNew;
+  }else if(data == 5){
+    // This is to result the wheel to the 0 position
+    long currentPosition = myEnc.read();
+    float currentAngularPosition = (currentPosition * 2* pi) / 3200;
+
+    //Serial.println(currentAngularPosition);
+    currentPosition = 3200 - (currentPosition % 3200);
+    float angularPositionDesired = currentAngularPosition + ((currentPosition * 2 * pi) / 3200);
+    
+   //Serial.println(angularPositionDesired);
+    thetaDesired = angularPositionDesired;
+  }else{
+    thetaDesired == 0;
   }
 }
 void sendData(){
-  toSend = angularPositionNew;
+  toSend = 2*pi*(newPosition%3200) / 3200;
   Wire.write(toSend);
 }
+
+int controller(double angularPositionNew){
+  float newError = thetaDesired - angularPositionNew;  
+  totalError += newError;
+  controlSignal = (Kp*newError)  + (Ki*(samplePeriod/1000)*totalError);  
+  finalControlSignal = controlSignal * 255;
+  if(finalControlSignal > 255){
+    finalControlSignal = 255;
+  }else if(finalControlSignal < 0){
+    finalControlSignal = 0;
+  }
+  return finalControlSignal;
+}
+
+
+
+  
+  
