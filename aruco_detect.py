@@ -55,8 +55,11 @@ class camera_control:
         self.parameters = aruco.DetectorParameters_create()
         
     def run_loop(self):
+        #Set time parameters
         end_time = time.time() + self.refresh_speed;
         self.output_num = 0
+        #This loop grabs an image, queries for Aruco images, and exits if it finds one.
+        #Otherwise, this loop exits after .25 seconds
         while(time.time() < end_time):
             self.camera.capture(self.rawCapture, format="bgr")
             image = self.rawCapture.array
