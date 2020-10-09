@@ -78,8 +78,19 @@ void setup() {
 void loop() {
   // Samples the current time
   currentTime = millis();
-  //Anolog write for pin 9
-  analogWrite(motor2Speed, controlResult);
+
+  // Code that runs a closed loop step response experiment with the hardware
+  if(currentTime < 1000){
+    //Anolog write for pin 9
+  analogWrite(motor2Speed, 0);
+  }else{
+    //Anolog write for pin 9
+    analogWrite(motor2Speed, controlResult);
+    thetaDesired = 1;
+  }
+
+  // This line can replace the entire if-else structure above if you want the system to behave as it should for the demonstration
+  //analogWrite(motor2Speed, controlResult);
   
   //4.4
   // Reads the current position of the encoder
@@ -90,7 +101,14 @@ void loop() {
     angularPositionNew = (newPosition * 2 * pi) / 3200;
     
     angularVelocity = ((angularPositionNew - angularPositionOld) / (samplePeriod)) * pow(10,3);
-    angularPositionOld = angularPositionNew;     
+    angularPositionOld = angularPositionNew;  
+
+    // Data reporting for the step response experiment (to be pasted into MATLAB)
+    Serial.print(currentTime);
+    Serial.print("\t");
+    Serial.print(angularPositionNew);
+    Serial.print("\t");
+    Serial.println(angularVelocity);
   }
 
 // Gives the new position to the PI controller to be used to determine the new PWM value
