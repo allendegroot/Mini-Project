@@ -66,7 +66,7 @@ void setup() {
   //analogWrite(motor1Speed, HIGH);
   //analogWrite(motor2Speed, HIGH);
 
-// Initializes the serial monitor and sets up the Arduino for I2C communication
+  //Initializes the serial monitor and sets up the Arduino for I2C communication
   Serial.begin(9600);
   Wire.begin(ADDRESS);
   Serial.println("Basic Encoder Test:");
@@ -82,7 +82,7 @@ void loop() {
   // Code that runs a closed loop step response experiment with the hardware
   if(currentTime < 1000){
     //Anolog write for pin 9
-  analogWrite(motor2Speed, 0);
+    analogWrite(motor2Speed, 0);
   }else{
     //Anolog write for pin 9
     analogWrite(motor2Speed, controlResult);
@@ -111,7 +111,7 @@ void loop() {
     Serial.println(angularVelocity);
   }
 
-// Gives the new position to the PI controller to be used to determine the new PWM value
+  // Gives the new position to the PI controller to be used to determine the new PWM value
   controlResult = controller(angularPositionNew);
   
   // Ensures the program continues to operate at a constant sampling rate
@@ -127,9 +127,8 @@ void receiveData(int byteCount){
   }
   // Resets the total error term for the PI controller
   totalError = 0;
+  
   // This maps the position of the Aruco image to a desired position for the wheel
-
-  // If a 1 is received turn the wheel 2 pi radians
   if(data == 1){                                  // If a 1 is received turn the wheel 2 pi radians
     thetaDesired = (2*pi)+angularPositionNew;
   }else if(data == 2){                            // If a 2 is received turn the wheel pi/2 radians
